@@ -149,14 +149,16 @@ class DocsService(gdata.service.GDataService):
       except AttributeError:
         uri = folder_or_uri
     else:
-      uri = '/feeds/documents/private/full'
+      uri = '/feeds/default/private/full'
+    
+    uri = uri.replace('folders', 'default') + '/contents' if not 'contents' in uri else uri
 
     entry = gdata.docs.DocumentListEntry()
     entry.title = atom.Title(text=title)
     if category is not None:
       entry.category.append(category)
     entry = self.Post(entry, uri, media_source=media_source,
-                      extra_headers={'Slug': media_source.file_name},
+                      extra_headers={'Slug': media_source.file_name, 'GData-Version': 3},
                       converter=gdata.docs.DocumentListEntryFromString)
     return entry
 
