@@ -75,8 +75,8 @@ SUPPORTED_FILETYPES = {
   'PPS': 'application/vnd.ms-powerpoint',
   'HTM': 'text/html',
   'HTML': 'text/html',
-  'ZIP': 'application/zip',
-  'SWF': 'application/x-shockwave-flash'
+  #'ZIP': 'application/zip',
+  #'SWF': 'application/x-shockwave-flash'
   }
 
 
@@ -86,6 +86,7 @@ class DocsService(gdata.service.GDataService):
 
   __FILE_EXT_PATTERN = re.compile('.*\.([a-zA-Z]{3,}$)')
   __RESOURCE_ID_PATTERN = re.compile('^([a-z]*)(:|%3A)([\w-]*)$')
+  __DOC_ID_PATTERN = re.compile(r'.*/(?P<id>[\d\w-]+)/.*')
 
   def __init__(self, email=None, password=None, source=None,
                server='docs.google.com', additional_headers=None, **kwargs):
@@ -112,16 +113,16 @@ class DocsService(gdata.service.GDataService):
         term=gdata.docs.DOCUMENTS_NAMESPACE + '#' + label, label=label)
 
   def _MakeContentLinkFromId(self, resource_id):
-    match = self.__RESOURCE_ID_PATTERN.match(resource_id)
-    label = match.group(1)
-    doc_id = match.group(3)
-    if label == DOCUMENT_LABEL:
-      return '/feeds/download/documents/Export?docId=%s' % doc_id
-    if label == PRESENTATION_LABEL:
-      return '/feeds/download/presentations/Export?docId=%s' % doc_id
-    if label == SPREADSHEET_LABEL:
-      return ('https://spreadsheets.google.com/feeds/download/spreadsheets/'
-              'Export?key=%s' % doc_id)
+    match = self.__DOC_ID_PATTERN.match(resource_id)
+    #label = match.group(1)
+    doc_id = match.group('id')
+    #if label == DOCUMENT_LABEL:
+    return 'https://docs.google.com/feeds/download/documents/Export?id=%s' % doc_id
+    #if label == PRESENTATION_LABEL:
+    #  return '/feeds/download/presentations/Export?docId=%s' % doc_id
+    #if label == SPREADSHEET_LABEL:
+    #  return ('https://spreadsheets.google.com/feeds/download/spreadsheets/'
+    #          'Export?key=%s' % doc_id)
     raise ValueError, 'Invalid resource id: %s' % resource_id
 
   def _UploadFile(self, media_source, title, category, folder_or_uri=None):
@@ -172,6 +173,7 @@ class DocsService(gdata.service.GDataService):
     Raises:
       RequestError: on error response from server.
     """
+    print uri
     server_response = self.request('GET', uri)
     response_body = server_response.read()
     if server_response.status != 200:
@@ -320,7 +322,7 @@ class DocsService(gdata.service.GDataService):
     if isinstance(entry_or_id_or_url, gdata.docs.DocumentListEntry):
       url = entry_or_id_or_url.content.src
     else:
-      if self.__RESOURCE_ID_PATTERN.match(entry_or_id_or_url):
+      if self.__DOC_ID_PATTERN.match(entry_or_id_or_url):
         url = self._MakeContentLinkFromId(entry_or_id_or_url)
       else:
         url = entry_or_id_or_url

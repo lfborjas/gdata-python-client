@@ -311,7 +311,9 @@ class CalendarService(gdata.service.GDataService):
     
     edit_uri = self._RemoveStandardUrlPrefix(edit_uri)
     return self.Delete('%s' % edit_uri,
-                       url_params=url_params, escape_params=escape_params)
+                       extra_headers=extra_headers,
+                       url_params=url_params,
+                       escape_params=escape_params)
 
   def DeleteAclEntry(self, edit_uri, extra_headers=None, 
       url_params=None, escape_params=True):
