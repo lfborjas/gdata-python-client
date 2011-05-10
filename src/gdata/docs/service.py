@@ -173,7 +173,6 @@ class DocsService(gdata.service.GDataService):
     Raises:
       RequestError: on error response from server.
     """
-    print uri
     server_response = self.request('GET', uri)
     response_body = server_response.read()
     if server_response.status != 200:
